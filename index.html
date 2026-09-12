@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --blue:#005EB8; --deep:#002A55; --ink:#03121F; --scarlet:#DA291C; --cream:#F2EDE3; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--ink); color:var(--cream); font-family:"Arial Narrow","Helvetica Neue",Arial,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  .marquee { background:var(--scarlet); overflow:hidden; white-space:nowrap; padding:9px 0; }
+  .marquee .track { display:inline-block; animation:scroll 24s linear infinite; }
+  .marquee span { font-size:13px; font-weight:900; letter-spacing:.3em; text-transform:uppercase; padding:0 30px; }
+  @keyframes scroll { from { transform:translateX(0);} to { transform:translateX(-50%);} }
+  .hero { position:relative; min-height:92vh; display:flex; flex-direction:column; justify-content:center; padding:60px 6vw; background:linear-gradient(120deg, var(--blue) 0%, #00417F 45%, var(--deep) 100%); overflow:hidden; }
+  .hero::before { content:""; position:absolute; inset:-40%; background:linear-gradient(115deg, transparent 42%, rgba(218,41,28,.28) 50%, transparent 58%); animation:sweep 7s ease-in-out infinite; }
+  @keyframes sweep { 0%,100% { transform:translateX(-18%);} 50% { transform:translateX(18%);} }
+  .knight-bg { position:absolute; right:-6vw; bottom:-14vh; font-size:clamp(340px,52vw,780px); line-height:.8; color:rgba(255,255,255,.06); user-select:none; pointer-events:none; z-index:0; }
+  .hero .chip { display:inline-block; background:var(--scarlet); color:#fff; font-weight:900; font-size:12px; letter-spacing:.35em; text-transform:uppercase; padding:8px 22px; transform:skewX(-10deg); width:max-content; }
+  .hero h1 { position:relative; z-index:2; font-size:clamp(64px,11vw,170px); font-weight:900; font-style:italic; text-transform:uppercase; line-height:.88; letter-spacing:-.02em; margin:26px 0 10px; text-shadow:0 6px 40px rgba(0,0,0,.35); }
+  .hero h1 .red { color:var(--scarlet); }
+  .hero .sub { position:relative; z-index:2; font-size:clamp(15px,2vw,22px); letter-spacing:.3em; text-transform:uppercase; color:rgba(242,237,227,.85); }
+  .hero .sub b { color:var(--scarlet); }
+  .meetbar { position:relative; z-index:2; display:flex; flex-wrap:wrap; gap:0; margin-top:44px; border:2px solid rgba(242,237,227,.25); width:max-content; max-width:100%; }
+  .meetbar div { padding:18px 30px; border-right:2px solid rgba(242,237,227,.25); font-size:13px; letter-spacing:.2em; text-transform:uppercase; line-height:1.7; }
+  .meetbar div:last-child { border-right:none; }
+  .meetbar b { display:block; font-size:clamp(16px,2vw,22px); letter-spacing:.05em; }
+  .meetbar .red b { color:var(--scarlet); }
+  .gallery-head { padding:56px 6vw 8px; font-size:12px; letter-spacing:.4em; text-transform:uppercase; color:var(--scarlet); font-weight:900; }
+  .gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:2px; padding:16px 6vw 70px; }
+  .card { position:relative; display:block; text-decoration:none; color:var(--cream); background:#06203C; padding:30px 26px 26px; border-top:4px solid transparent; transition:all .25s; overflow:hidden; }
+  .card:hover { background:var(--blue); border-top-color:var(--scarlet); transform:translateY(-4px); }
+  .card .n { font-size:11px; letter-spacing:.3em; color:var(--scarlet); font-weight:900; }
+  .card h3 { font-size:26px; font-weight:900; text-transform:uppercase; margin:8px 0 6px; font-style:italic; }
+  .card p { font-size:13px; line-height:1.6; color:rgba(242,237,227,.75); }
+  .card .arrow { position:absolute; top:24px; right:22px; color:var(--scarlet); font-weight:900; }
+  footer { padding:20px 6vw; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:11px; letter-spacing:.25em; text-transform:uppercase; border-top:1px solid rgba(242,237,227,.15); }
+  footer a { color:var(--scarlet); text-decoration:none; font-weight:900; }
+</style>
+</head>
+<body>
+<div class="marquee"><div class="track" id="m"></div></div>
+
+<section class="hero" id="meet">
+  <div class="knight-bg">♞</div>
+  <div class="chip">Lincoln Park - Chicago</div>
+  <h1>DePaul<br>Chess <span class="red">Club</span></h1>
+  <div class="sub">Boards provided - <b>All skill levels welcome</b> - Just show up</div>
+  <div class="meetbar">
+    <div class="red"><b>Thursdays</b>6:00 - 7:30 PM</div>
+    <div><b>Arts &amp; Letters</b>Room 412</div>
+    <div><b>Every week</b>All quarter</div>
+  </div>
+</section>
+
+<div class="gallery-head">One club - eleven doors in</div>
+<div class="gallery">
+  <a class="card" href="athletics.html"><span class="n">01</span><span class="arrow">&rarr;</span><h3>Athletics</h3><p>Varsity-jacket royal. The club as a sports program.</p></a>
+  <a class="card" href="editorial.html"><span class="n">02</span><span class="arrow">&rarr;</span><h3>Editorial</h3><p>Front-page newspaper. Extra, extra: chess on Thursdays.</p></a>
+  <a class="card" href="dark.html"><span class="n">03</span><span class="arrow">&rarr;</span><h3>After Dark</h3><p>Midnight navy, neon scarlet. The 10 PM version.</p></a>
+  <a class="card" href="plakat.html"><span class="n">04</span><span class="arrow">&rarr;</span><h3>Plakat</h3><p>Swiss poster minimalism. Type as architecture.</p></a>
+  <a class="card" href="board.html"><span class="n">05</span><span class="arrow">&rarr;</span><h3>The Board</h3><p>The whole hero is the chessboard. Info lives in the squares.</p></a>
+  <a class="card" href="ticker.html"><span class="n">06</span><span class="arrow">&rarr;</span><h3>Ticker</h3><p>Sports broadcast. Computes the next four Thursdays itself.</p></a>
+  <a class="card" href="3d.html"><span class="n">07 - 3D</span><span class="arrow">&rarr;</span><h3>The Arena</h3><p>Full royal-and-cream chess set, turntable orbit, knight monument.</p></a>
+  <a class="card" href="3d-monolith.html"><span class="n">08 - 3D</span><span class="arrow">&rarr;</span><h3>The Knight</h3><p>The club mark as a statue. Floating pawns, dark void.</p></a>
+  <a class="card" href="3d-play.html"><span class="n">09 - 3D</span><span class="arrow">&rarr;</span><h3>Pick a Piece</h3><p>Hover lifts a piece. Click one and it answers a question.</p></a>
+  <a class="card" href="3d-vinny.html"><span class="n">10 - 3D</span><span class="arrow">&rarr;</span><h3>Vinny</h3><p>Our blue demon mascot, Blender-built, holding a scarlet knight.</p></a>
+</div>
+
+<footer>
+  <span>DePaul Chess Club - Lincoln Park</span>
+  <span>Thursdays 6:00-7:30 PM - <a href="#meet">Arts &amp; Letters 412</a></span>
+</footer>
+
+<script>
+var items = ["EVERY THURSDAY","6:00 - 7:30 PM","ARTS & LETTERS 412","BOARDS PROVIDED","ALL SKILL LEVELS WELCOME","JUST SHOW UP"];
+var seq = items.map(function(t){ return "<span>"+t+" &#9822;</span>"; }).join("");
+document.getElementById('m').innerHTML = seq+seq;
+</script>
+</body>
+</html>

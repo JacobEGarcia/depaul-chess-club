@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club - The Knight</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --blue:#005EB8; --scarlet:#DA291C; --cream:#F2EDE3; --deep:#050B14; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--deep); color:var(--cream); font-family:"Helvetica Neue",Arial,sans-serif; overflow:hidden; }
+  #scene { position:fixed; inset:0; }
+  .ui { position:fixed; inset:0; pointer-events:none; }
+  .vert { position:fixed; top:50%; font-size:12px; letter-spacing:.5em; text-transform:uppercase; color:rgba(242,237,227,.55); }
+  .vert.l { left:34px; transform:translateY(-50%) rotate(180deg); writing-mode:vertical-rl; }
+  .vert.r { right:34px; transform:translateY(-50%); writing-mode:vertical-rl; }
+  .vert b { color:var(--scarlet); }
+  .lockup { position:fixed; left:44px; bottom:40px; }
+  .lockup h1 { font-size:clamp(40px,6vw,96px); font-weight:900; text-transform:uppercase; line-height:.92; }
+  .lockup h1 span { color:var(--scarlet); }
+  .lockup p { margin-top:14px; font-size:clamp(12px,1.3vw,16px); letter-spacing:.2em; text-transform:uppercase; line-height:2; }
+  .lockup p b { color:var(--scarlet); }
+  .corner { position:fixed; top:36px; left:44px; font-size:11px; letter-spacing:.35em; text-transform:uppercase; }
+  .corner span { color:var(--scarlet); }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="ui">
+  <div class="corner"><span>■</span> DePaul Chess Club</div>
+  <div class="vert l">Arts &amp; Letters Hall - Room 412 - Lincoln Park</div>
+  <div class="vert r">Boards provided - <b>All skill levels welcome</b></div>
+  <div class="lockup">
+    <h1>The<br><span>Knight</span></h1>
+    <p>Every <b>Thursday</b> 6:00-7:30 PM<br>Just show up</p>
+  </div>
+</div>
+<script src="vendor/three.min.js"></script>
+<script src="pieces.js"></script>
+<script>
+var renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050B14);
+scene.fog = new THREE.Fog(0x050B14, 16, 34);
+var camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(4.5, 3.2, 7.5);
+
+scene.add(new THREE.HemisphereLight(0x3a6ea8, 0x06090f, 0.4));
+var key = new THREE.SpotLight(0xffffff, 0.75, 40, 0.6, 0.65);
+key.position.set(6.5, 10, 1.5); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+scene.add(key);
+var front = new THREE.PointLight(0xF2EDE3, 0.7, 25);
+front.position.set(0, 4, 8);
+scene.add(front);
+var rimL = new THREE.DirectionalLight(0xDA291C, 1.1);
+rimL.position.set(-6, 3, -5);
+scene.add(rimL);
+var rimR = new THREE.DirectionalLight(0x005EB8, 0.9);
+rimR.position.set(6, 2, -6);
+scene.add(rimR);
+
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(70,70), new THREE.MeshStandardMaterial({ color:0x060d16, roughness:0.85, metalness:0.1 }));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
+scene.add(ground);
+
+// Royal-blue pedestal
+var ped = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.5, 0.9, 8), dpMat(DPC.royal, 0.25, 0.35));
+ped.position.y = 0.45; ped.castShadow = true; ped.receiveShadow = true;
+scene.add(ped);
+var pedTop = new THREE.Mesh(new THREE.CylinderGeometry(2.15, 2.15, 0.1, 8), dpMat(DPC.deep, 0.3, 0.4));
+pedTop.position.y = 0.95; pedTop.receiveShadow = true;
+scene.add(pedTop);
+
+// Monumental scarlet knight
+var knight = makeKnight(dpMat(DPC.scarlet, 0.28, 0.4));
+knight.children[0].material = dpMat(DPC.scarlet, 0.6, 0.05); // matte base, no hotspot
+knight.scale.set(3.4,3.4,3.4);
+knight.position.y = 1.0;
+knight.rotation.y = 0.6;
+scene.add(knight);
+
+// Floating ring of small cream pawns
+var ring = new THREE.Group();
+for (var i=0;i<12;i++){
+  var p = makePawn(dpMat(DPC.cream, 0.4, 0.05));
+  p.scale.set(0.5,0.5,0.5);
+  var a = (i+0.5)/12*Math.PI*2;
+  p.position.set(Math.cos(a)*5.2, 1.6+Math.sin(i*1.7)*0.5, Math.sin(a)*5.2);
+  ring.add(p);
+}
+scene.add(ring);
+
+function animate(t){
+  requestAnimationFrame(animate);
+  var time = t*0.001;
+  knight.rotation.y = 0.6 + time*0.25;
+  ring.rotation.y = -time*0.08;
+  camera.position.x = Math.sin(time*0.1+0.55)*8.6;
+  camera.position.z = Math.cos(time*0.1+0.55)*8.6;
+  camera.position.y = 3.0 + Math.sin(time*0.23)*0.5;
+  camera.lookAt(0, 2.6, 0);
+  renderer.render(scene, camera);
+}
+animate(0);
+addEventListener('resize', function(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+<style>
+#dpnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9999;display:flex;gap:1px;background:rgba(3,18,31,.85);border:1px solid rgba(0,94,184,.7);backdrop-filter:blur(8px);padding:5px;font-family:monospace;font-size:10px;letter-spacing:.12em;border-radius:3px;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#dpnav a{color:#F2EDE3;text-decoration:none;padding:5px 8px;border-radius:2px;white-space:nowrap}
+#dpnav a:hover{background:#005EB8}
+#dpnav a.cur{background:#DA291C;color:#fff;font-weight:700}
+</style><nav id="dpnav"><a href="index.html">HOME</a><a href="athletics.html">ATHLETICS</a><a href="editorial.html">EDITORIAL</a><a href="dark.html">DARK</a><a href="plakat.html">PLAKAT</a><a href="board.html">BOARD</a><a href="ticker.html">TICKER</a><a href="3d.html">ARENA</a><a href="3d-monolith.html" class="cur">KNIGHT</a><a href="3d-play.html">PLAY</a><a href="3d-vinny.html">VINNY</a></nav></body>
+</html>

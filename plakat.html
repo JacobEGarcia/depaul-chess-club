@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club - Plakat</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --paper:#F2EDE3; --ink:#141310; --red:#DA291C; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--paper); color:var(--ink); font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+  .hero { position:relative; display:flex; flex-direction:column; padding:40px 48px 0; }
+  .meta-top { display:flex; justify-content:space-between; font-size:12px; letter-spacing:.3em; text-transform:uppercase; font-weight:600; }
+  .meta-top .sq { display:inline-block; width:12px; height:12px; background:var(--red); margin-right:10px; }
+  .stack { position:relative; z-index:2; margin-top:2vh; }
+  .stack .row { font-weight:900; text-transform:uppercase; line-height:.86; letter-spacing:-.03em; }
+  .stack .r1 { font-size:clamp(110px,21vw,300px); }
+  .stack .r2 { font-size:clamp(110px,21vw,300px); color:var(--red); margin-left:8vw; }
+  .stack .r3 { font-size:clamp(28px,4.5vw,64px); letter-spacing:.35em; margin-top:3vh; font-weight:700; }
+  .knight-bg { position:absolute; right:-4vw; top:12vh; font-size:clamp(300px,44vw,640px); line-height:.8; color:var(--ink); opacity:.09; z-index:1; user-select:none; pointer-events:none; }
+  .hero-info { position:relative; z-index:2; display:grid; grid-template-columns:auto auto auto 1fr; gap:0; border-top:3px solid var(--ink); margin:8vh -48px 0; }
+  .hero-info > div { padding:28px 40px; border-right:1px solid var(--ink); }
+  .hero-info .k { font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--red); font-weight:700; margin-bottom:10px; }
+  .hero-info .v { font-size:clamp(16px,1.8vw,22px); font-weight:900; text-transform:uppercase; line-height:1.2; }
+  .hero-info .cta { border-right:none; display:flex; align-items:center; justify-content:flex-end; }
+  .hero-info .cta a { display:inline-block; background:var(--ink); color:var(--paper); padding:16px 36px; text-decoration:none; font-size:13px; letter-spacing:.25em; text-transform:uppercase; font-weight:700; }
+  .hero-info .cta a:hover { background:var(--red); }
+  main { border-top:3px solid var(--ink); padding:80px 48px; display:grid; grid-template-columns:1fr 1fr; gap:64px; max-width:1280px; margin:0 auto; }
+  main h2 { font-size:clamp(30px,4vw,52px); font-weight:900; text-transform:uppercase; line-height:1.05; letter-spacing:-.01em; }
+  main h2 span { color:var(--red); }
+  main .copy p { font-size:17px; line-height:1.7; margin-bottom:16px; max-width:48ch; }
+  main .copy .rule { width:64px; height:6px; background:var(--red); margin:28px 0; }
+  footer { border-top:3px solid var(--ink); padding:20px 48px; display:flex; justify-content:space-between; font-size:11px; letter-spacing:.25em; text-transform:uppercase; flex-wrap:wrap; gap:8px; }
+  footer a { color:var(--red); text-decoration:none; font-weight:700; }
+  @media (max-width:820px) {
+    .hero { padding:28px 24px 0; }
+    .hero-info { grid-template-columns:1fr; margin:5vh -24px 0; }
+    .hero-info > div { border-right:none; border-top:1px solid var(--ink); padding:22px 24px; }
+    main { grid-template-columns:1fr; padding:48px 24px; }
+    .stack .r2 { margin-left:4vw; }
+  }
+</style>
+</head>
+<body>
+<section class="hero" id="meet">
+  <div class="meta-top"><span><span class="sq"></span>DePaul University - Lincoln Park</span><span>Weekly Chess</span></div>
+  <div class="knight-bg">♞</div>
+  <div class="stack">
+    <div class="row r1">Chess</div>
+    <div class="row r2">Club</div>
+    <div class="row r3">DePaul - Room 412</div>
+  </div>
+  <div class="hero-info">
+    <div><div class="k">When</div><div class="v">Thursdays<br>6:00 - 7:30 PM</div></div>
+    <div><div class="k">Where</div><div class="v">Arts &amp; Letters<br>Room 412</div></div>
+    <div><div class="k">Bring</div><div class="v">Nothing<br>Boards provided</div></div>
+    <div class="cta"><a href="#about">Just show up</a></div>
+  </div>
+</section>
+<main id="about">
+  <h2>First-timer or rated player, <span>pull up a chair.</span></h2>
+  <div class="copy">
+    <p>We meet every Thursday evening in Arts and Letters Hall room 412. Boards, pieces, and clocks are provided - you bring nothing but yourself.</p>
+    <p>Casual games, blitz, puzzles, and the occasional internal tournament. Never touched a board? Someone will teach you in one meeting.</p>
+    <div class="rule"></div>
+    <p>Come once or come every week. No dues, no sign-up, no tryouts. All skill levels welcome.</p>
+  </div>
+</main>
+<footer>
+  <span>DePaul Chess Club - Lincoln Park, Chicago</span>
+  <span>Thursdays 6:00-7:30 PM - <a href="#meet">Arts &amp; Letters 412</a></span>
+</footer>
+<style>
+#dpnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9999;display:flex;gap:1px;background:rgba(3,18,31,.85);border:1px solid rgba(0,94,184,.7);backdrop-filter:blur(8px);padding:5px;font-family:monospace;font-size:10px;letter-spacing:.12em;border-radius:3px;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#dpnav a{color:#F2EDE3;text-decoration:none;padding:5px 8px;border-radius:2px;white-space:nowrap}
+#dpnav a:hover{background:#005EB8}
+#dpnav a.cur{background:#DA291C;color:#fff;font-weight:700}
+</style><nav id="dpnav"><a href="index.html">HOME</a><a href="athletics.html">ATHLETICS</a><a href="editorial.html">EDITORIAL</a><a href="dark.html">DARK</a><a href="plakat.html" class="cur">PLAKAT</a><a href="board.html">BOARD</a><a href="ticker.html">TICKER</a><a href="3d.html">ARENA</a><a href="3d-monolith.html">KNIGHT</a><a href="3d-play.html">PLAY</a><a href="3d-vinny.html">VINNY</a></nav></body>
+</html>

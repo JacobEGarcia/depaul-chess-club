@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club - Pick a Piece</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --blue:#005EB8; --scarlet:#DA291C; --cream:#F2EDE3; --deep:#02101E; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--deep); color:var(--cream); font-family:"Helvetica Neue",Arial,sans-serif; overflow:hidden; }
+  #scene { position:fixed; inset:0; cursor:pointer; }
+  .head { position:fixed; top:34px; left:0; right:0; text-align:center; pointer-events:none; }
+  .head h1 { font-size:clamp(26px,4vw,52px); font-weight:900; text-transform:uppercase; letter-spacing:-.01em; }
+  .head h1 span { color:var(--scarlet); }
+  .head p { margin-top:8px; font-size:12px; letter-spacing:.35em; text-transform:uppercase; color:rgba(242,237,227,.6); }
+  .card { position:fixed; left:50%; bottom:44px; transform:translateX(-50%) translateY(30px); opacity:0; transition:all .35s ease; background:rgba(2,16,30,.88); border:1px solid rgba(0,94,184,.6); border-left:6px solid var(--scarlet); padding:22px 34px; min-width:300px; max-width:90vw; text-align:center; backdrop-filter:blur(6px); pointer-events:none; }
+  .card.on { transform:translateX(-50%) translateY(0); opacity:1; }
+  .card h2 { font-size:clamp(20px,2.6vw,32px); font-weight:900; text-transform:uppercase; color:var(--scarlet); letter-spacing:.02em; }
+  .card p { margin-top:8px; font-size:clamp(13px,1.4vw,17px); line-height:1.6; }
+  .hint { position:fixed; bottom:44px; left:50%; transform:translateX(-50%); font-size:11px; letter-spacing:.35em; text-transform:uppercase; color:rgba(242,237,227,.45); transition:opacity .3s; pointer-events:none; }
+  .hint.off { opacity:0; }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="head">
+  <h1>DePaul Chess <span>Club</span></h1>
+  <p>The board answers everything</p>
+</div>
+<div class="hint" id="hint">Hover a piece - click to ask it</div>
+<div class="card" id="card"><h2 id="cardTitle"></h2><p id="cardBody"></p></div>
+<script src="vendor/three.min.js"></script>
+<script src="pieces.js"></script>
+<script>
+var INFO = {
+  king:   ["The Club", "DePaul Chess Club - Lincoln Park's weekly home for the game. Casual games, blitz, puzzles, the occasional tournament."],
+  queen:  ["When", "Every Thursday, 6:00-7:30 PM, all quarter long. Come once or come every week."],
+  rook:   ["Where", "Arts & Letters Hall, Room 412, Lincoln Park Campus. The door is open."],
+  knight: ["Who", "First-timer or rated player - all skill levels welcome. Never touched a board? Someone will teach you in one meeting."],
+  bishop: ["Bring", "Nothing. Boards, pieces, and clocks are provided. You bring you."],
+  pawn:   ["Why", "Because chess is better across a board than across a screen. No dues, no sign-up, no tryouts. Just show up."]
+};
+var renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x02101E);
+scene.fog = new THREE.Fog(0x02101E, 18, 36);
+var camera = new THREE.PerspectiveCamera(36, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 9.4, 10.8);
+camera.lookAt(0, 0, 0.4);
+
+scene.add(new THREE.HemisphereLight(0x5588bb, 0x08121e, 0.6));
+var key = new THREE.DirectionalLight(0xd6e6ff, 1.0);
+key.position.set(5, 10, 6); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.left=-7; key.shadow.camera.right=7; key.shadow.camera.top=7; key.shadow.camera.bottom=-7;
+scene.add(key);
+var rim = new THREE.DirectionalLight(0xDA291C, 0.7);
+rim.position.set(-5, 3, -6);
+scene.add(rim);
+
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.MeshStandardMaterial({ color:0x03182b, roughness:0.9 }));
+ground.rotation.x = -Math.PI/2; ground.position.y = -0.15; ground.receiveShadow = true;
+scene.add(ground);
+
+scene.add(makeBoard(1.12, DPC.cream, DPC.royal));
+var set = makeChessSet(dpMat(DPC.cream, 0.35, 0.05), dpMat(DPC.royal, 0.25, 0.3));
+scene.add(set);
+
+// Tag each back-rank piece group with its type for picking
+var pickables = [];
+var types = ['rook','knight','bishop','queen','king','bishop','knight','rook'];
+set.children.forEach(function(p, i){
+  var type = 'pawn';
+  if (i < 8)  type = types[i];        // light back rank
+  if (i >= 16 && i < 24) type = types[i-16]; // dark back rank
+  p.userData.type = type;
+  p.userData.baseY = p.position.y;
+  p.traverse(function(o){ if (o.isMesh){ o.userData.root = p; pickables.push(o); } });
+});
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2(-2,-2);
+var hovered = null, selected = null;
+var card = document.getElementById('card'), hint = document.getElementById('hint');
+
+addEventListener('pointermove', function(e){
+  mouse.x = (e.clientX/innerWidth)*2-1;
+  mouse.y = -(e.clientY/innerHeight)*2+1;
+});
+addEventListener('click', function(){
+  if (hovered){
+    selected = hovered;
+    var info = INFO[hovered.userData.type];
+    document.getElementById('cardTitle').textContent = info[0];
+    document.getElementById('cardBody').textContent = info[1];
+    card.classList.add('on'); hint.classList.add('off');
+  } else {
+    selected = null; card.classList.remove('on');
+  }
+});
+
+function animate(t){
+  requestAnimationFrame(animate);
+  var time = t*0.001;
+  raycaster.setFromCamera(mouse, camera);
+  var hits = raycaster.intersectObjects(pickables);
+  var root = hits.length ? hits[0].object.userData.root : null;
+  if (root !== hovered){ hovered = root; document.body.style.cursor = root ? 'pointer' : 'default'; }
+  set.children.forEach(function(p){
+    var target = p.userData.baseY;
+    if (p === hovered || p === selected) target += 0.35 + Math.sin(time*3)*0.03;
+    p.position.y += (target - p.position.y)*0.18;
+    if (p === hovered) p.rotation.y += 0.02;
+  });
+  camera.position.x = Math.sin(time*0.07)*1.2;
+  camera.lookAt(0, 0, 0.4);
+  renderer.render(scene, camera);
+}
+animate(0);
+addEventListener('resize', function(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+<style>
+#dpnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9999;display:flex;gap:1px;background:rgba(3,18,31,.85);border:1px solid rgba(0,94,184,.7);backdrop-filter:blur(8px);padding:5px;font-family:monospace;font-size:10px;letter-spacing:.12em;border-radius:3px;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#dpnav a{color:#F2EDE3;text-decoration:none;padding:5px 8px;border-radius:2px;white-space:nowrap}
+#dpnav a:hover{background:#005EB8}
+#dpnav a.cur{background:#DA291C;color:#fff;font-weight:700}
+</style><nav id="dpnav"><a href="index.html">HOME</a><a href="athletics.html">ATHLETICS</a><a href="editorial.html">EDITORIAL</a><a href="dark.html">DARK</a><a href="plakat.html">PLAKAT</a><a href="board.html">BOARD</a><a href="ticker.html">TICKER</a><a href="3d.html">ARENA</a><a href="3d-monolith.html">KNIGHT</a><a href="3d-play.html" class="cur">PLAY</a><a href="3d-vinny.html">VINNY</a></nav></body>
+</html>

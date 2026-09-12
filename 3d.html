@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club - The Arena</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --blue:#005EB8; --scarlet:#DA291C; --cream:#F2EDE3; --deep:#03121F; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--deep); color:var(--cream); font-family:"Helvetica Neue",Arial,sans-serif; overflow:hidden; }
+  #scene { position:fixed; inset:0; }
+  .ui { position:fixed; inset:0; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:36px 44px; }
+  .top { display:flex; justify-content:space-between; font-size:12px; letter-spacing:.3em; text-transform:uppercase; }
+  .top .dot { color:var(--scarlet); }
+  .bottom { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; }
+  h1 { font-size:clamp(42px,7vw,110px); font-weight:900; text-transform:uppercase; line-height:.92; letter-spacing:-.02em; }
+  h1 span { color:var(--scarlet); }
+  .meet { text-align:right; font-size:clamp(13px,1.4vw,17px); line-height:1.8; text-transform:uppercase; letter-spacing:.15em; }
+  .meet b { color:var(--scarlet); }
+  .meet .big { font-size:clamp(18px,2.4vw,28px); font-weight:900; display:block; }
+  .tag { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); font-size:11px; letter-spacing:.4em; text-transform:uppercase; color:rgba(242,237,227,.5); pointer-events:none; }
+  a { color:var(--cream); pointer-events:auto; }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="ui">
+  <div class="top"><span><span class="dot">■</span> DePaul University - Lincoln Park</span><span>Est. Room 412</span></div>
+  <div class="bottom">
+    <h1>DePaul<br>Chess <span>Club</span></h1>
+    <div class="meet">
+      <span class="big">Every <b>Thursday</b> 6:00-7:30 PM</span>
+      Arts &amp; Letters Hall - Room 412<br>
+      Boards provided - All levels welcome
+    </div>
+  </div>
+</div>
+<script src="vendor/three.min.js"></script>
+<script src="pieces.js"></script>
+<script>
+var renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x03121F);
+scene.fog = new THREE.Fog(0x03121F, 14, 30);
+
+var camera = new THREE.PerspectiveCamera(38, innerWidth/innerHeight, 0.1, 100);
+
+// Lighting: cool royal key, scarlet rim, warm fill
+scene.add(new THREE.HemisphereLight(0x4a86c8, 0x0a1a2a, 0.55));
+var key = new THREE.DirectionalLight(0xbfd9ff, 1.0);
+key.position.set(6, 10, 4); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.left=-8; key.shadow.camera.right=8; key.shadow.camera.top=8; key.shadow.camera.bottom=-8;
+scene.add(key);
+var rim = new THREE.DirectionalLight(0xDA291C, 0.9);
+rim.position.set(-6, 4, -6);
+scene.add(rim);
+var fill = new THREE.PointLight(0x005EB8, 0.8, 30);
+fill.position.set(0, 6, 6);
+scene.add(fill);
+
+// Ground
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(60,60), new THREE.MeshStandardMaterial({ color:0x041626, roughness:0.9 }));
+ground.rotation.x = -Math.PI/2; ground.position.y = -0.15; ground.receiveShadow = true;
+scene.add(ground);
+
+var table = new THREE.Group();
+table.add(makeBoard(1.12, DPC.cream, DPC.royal));
+table.add(makeChessSet(dpMat(DPC.cream, 0.35, 0.05), dpMat(DPC.royal, 0.25, 0.3)));
+scene.add(table);
+
+// One hero knight in scarlet mid-board, oversized - the club mark
+var hero = makeKnight(dpMat(DPC.scarlet, 0.22, 0.35));
+hero.scale.set(2.3,2.3,2.3);
+hero.position.set(6.4, -0.15, 1.2);
+hero.rotation.y = 2.7;
+scene.add(hero);
+
+var t0 = 0;
+function animate(t){
+  requestAnimationFrame(animate);
+  var time = t*0.001;
+  table.rotation.y = time*0.12 + 2.4;   // slow turntable, good initial angle
+  hero.position.y = -0.15;
+  hero.rotation.y = 2.7 + Math.sin(time*0.6)*0.12;
+  var a = time*0.12 + 2.4;
+  camera.position.set(Math.sin(a+1.9)*11, 6.5+Math.sin(time*0.3)*0.6, Math.cos(a+1.9)*11);
+  camera.lookAt(0, 0.9, 0);
+  renderer.render(scene, camera);
+}
+animate(0);
+addEventListener('resize', function(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+<style>
+#dpnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9999;display:flex;gap:1px;background:rgba(3,18,31,.85);border:1px solid rgba(0,94,184,.7);backdrop-filter:blur(8px);padding:5px;font-family:monospace;font-size:10px;letter-spacing:.12em;border-radius:3px;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#dpnav a{color:#F2EDE3;text-decoration:none;padding:5px 8px;border-radius:2px;white-space:nowrap}
+#dpnav a:hover{background:#005EB8}
+#dpnav a.cur{background:#DA291C;color:#fff;font-weight:700}
+</style><nav id="dpnav"><a href="index.html">HOME</a><a href="athletics.html">ATHLETICS</a><a href="editorial.html">EDITORIAL</a><a href="dark.html">DARK</a><a href="plakat.html">PLAKAT</a><a href="board.html">BOARD</a><a href="ticker.html">TICKER</a><a href="3d.html" class="cur">ARENA</a><a href="3d-monolith.html">KNIGHT</a><a href="3d-play.html">PLAY</a><a href="3d-vinny.html">VINNY</a></nav></body>
+</html>

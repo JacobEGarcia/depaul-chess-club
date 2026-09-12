@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DePaul Chess Club - Vinny</title>
+<meta name="description" content="DePaul Chess Club meets every Thursday 6:00-7:30 PM in Arts and Letters Hall room 412. Boards provided, all skill levels welcome.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♞</text></svg>">
+<style>
+  :root { --blue:#005EB8; --scarlet:#DA291C; --cream:#F2EDE3; --deep:#04101E; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--deep); color:var(--cream); font-family:"Helvetica Neue",Arial,sans-serif; overflow:hidden; }
+  #scene { position:fixed; inset:0; }
+  .ui { position:fixed; inset:0; pointer-events:none; }
+  .corner { position:fixed; top:36px; left:44px; font-size:11px; letter-spacing:.35em; text-transform:uppercase; }
+  .corner span { color:var(--scarlet); }
+  .side { position:fixed; right:44px; bottom:40px; text-align:right; }
+  .side h1 { font-size:clamp(52px,8vw,130px); font-weight:900; text-transform:uppercase; line-height:.9; }
+  .side h1 span { color:var(--scarlet); }
+  .side p { margin-top:12px; font-size:12px; letter-spacing:.3em; text-transform:uppercase; color:rgba(242,237,227,.75); line-height:2; }
+  .side p b { color:var(--scarlet); }
+  .meet { position:fixed; left:44px; bottom:40px; font-size:clamp(12px,1.3vw,16px); line-height:2; text-transform:uppercase; letter-spacing:.18em; }
+  .meet b { color:var(--scarlet); }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="ui">
+  <div class="corner"><span>■</span> DePaul Chess Club</div>
+  <div class="side">
+    <h1>Vinny<span>.</span></h1>
+    <p>Club <b>mascot</b> - resident <b>blue demon</b><br>Blender-built, board-approved</p>
+  </div>
+  <div class="meet">Every <b>Thursday</b> 6:00-7:30 PM<br>Arts &amp; Letters 412 - Just show up</div>
+</div>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
+<script src="pieces.js"></script>
+<script>
+var renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04101E);
+scene.fog = new THREE.Fog(0x04101E, 16, 34);
+var camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 100);
+
+scene.add(new THREE.HemisphereLight(0x5588bb, 0x08121e, 0.5));
+var key = new THREE.SpotLight(0xffffff, 1.1, 45, 0.55, 0.5);
+key.position.set(6, 11, 5); key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+scene.add(key);
+var rim = new THREE.DirectionalLight(0xDA291C, 1.0);
+rim.position.set(-7, 4, -6);
+scene.add(rim);
+var cool = new THREE.DirectionalLight(0x005EB8, 0.6);
+cool.position.set(6, 2, -7);
+scene.add(cool);
+
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(70,70), new THREE.MeshStandardMaterial({ color:0x06182c, roughness:0.9 }));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
+scene.add(ground);
+
+// Royal pedestal
+var ped = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 3.3, 0.36, 48), dpMat(DPC.royal, 0.3, 0.3));
+ped.position.y = 0.18; ped.castShadow = true; ped.receiveShadow = true;
+scene.add(ped);
+var pedTop = new THREE.Mesh(new THREE.CylinderGeometry(2.94, 2.94, 0.06, 48), dpMat(DPC.deep, 0.35, 0.4));
+pedTop.position.y = 0.38; pedTop.receiveShadow = true;
+scene.add(pedTop);
+
+// Guard of honor: back ranks flanking him on the plinth
+var guardL = [makeRook, makeKnight, makeBishop, makeQueen].map(function(f){ return f(dpMat(DPC.royal,0.28,0.3)); });
+var guardR = [makeKing, makeBishop, makeKnight, makeRook].map(function(f){ return f(dpMat(DPC.cream,0.4,0.05)); });
+guardL.forEach(function(p,i){ p.scale.set(0.62,0.62,0.62); p.position.set((i-1.5)*0.75, 0.41, -1.9); scene.add(p); });
+guardR.forEach(function(p,i){ p.scale.set(0.62,0.62,0.62); p.position.set((i-1.5)*0.75, 0.41, 1.9); p.rotation.y = Math.PI; scene.add(p); });
+
+// Vinny
+var vinny = null;
+new THREE.GLTFLoader().load('vinny.glb', function(g){
+  vinny = g.scene;
+  vinny.traverse(function(o){ if (o.isMesh){ o.castShadow = true; o.receiveShadow = true; } });
+  // Swap the old blocky held knight for the new Staunton knight
+  var kparts=[], kbase=null;
+  vinny.traverse(function(o){
+    if (['knight_base','kneck','khead','kmuzz','kear'].indexOf(o.name)>=0){ kparts.push(o); if (o.name==='knight_base') kbase=o; }
+  });
+  if (kbase){
+    var kparent = kbase.parent;
+    kparent.updateWorldMatrix(true,true);
+    var bb = new THREE.Box3();
+    kparts.forEach(function(o){ bb.expandByObject(o); });
+    var kh = bb.max.y - bb.min.y;
+    var ctr = bb.getCenter(new THREE.Vector3());
+    kparts.forEach(function(o){ o.visible = false; });
+    var nk = makeKnight(dpMat(DPC.scarlet, 0.25, 0.3));
+    var ks = kh / 1.35;
+    nk.scale.set(ks,ks,ks);
+    var inv = new THREE.Matrix4().getInverse(kparent.matrixWorld);
+    var bot = new THREE.Vector3(ctr.x, bb.min.y, ctr.z).applyMatrix4(inv);
+    nk.position.copy(bot);
+    var pw = new THREE.Quaternion(); kparent.getWorldQuaternion(pw);
+    var kw = new THREE.Quaternion(); kbase.getWorldQuaternion(kw);
+    nk.quaternion.copy(pw.invert().multiply(kw));
+    kparent.add(nk);
+  }
+  var bbox = new THREE.Box3().setFromObject(vinny);
+  var h = bbox.max.y - bbox.min.y;
+  var s = 3.2 / h;                       // normalize to ~3.2 units tall
+  vinny.scale.set(s,s,s);
+  vinny.position.y = 0.41 - bbox.min.y*s;
+  vinny.rotation.y = 0.35;
+  vinny.userData.baseY = vinny.position.y;
+  scene.add(vinny);
+});
+
+function animate(t){
+  requestAnimationFrame(animate);
+  var time = t*0.001;
+  if (vinny){
+    vinny.rotation.y = 0.35 + Math.sin(time*0.45)*0.35;
+    vinny.position.y += (vinny.userData.baseY + Math.abs(Math.sin(time*1.6))*0.06 - vinny.position.y)*0.2; // idle bounce
+  }
+  var a = 0.7 + Math.sin(time*0.14)*0.8;   // sweep the front arc only
+  camera.position.set(Math.sin(a)*7.8, 3.4+Math.sin(time*0.25)*0.4, Math.cos(a)*7.8);
+  camera.lookAt(0, 1.5, 0);
+  renderer.render(scene, camera);
+}
+animate(0);
+addEventListener('resize', function(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+<style>
+#dpnav{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9999;display:flex;gap:1px;background:rgba(3,18,31,.85);border:1px solid rgba(0,94,184,.7);backdrop-filter:blur(8px);padding:5px;font-family:monospace;font-size:10px;letter-spacing:.12em;border-radius:3px;max-width:96vw;flex-wrap:wrap;justify-content:center}
+#dpnav a{color:#F2EDE3;text-decoration:none;padding:5px 8px;border-radius:2px;white-space:nowrap}
+#dpnav a:hover{background:#005EB8}
+#dpnav a.cur{background:#DA291C;color:#fff;font-weight:700}
+</style><nav id="dpnav"><a href="index.html">HOME</a><a href="athletics.html">ATHLETICS</a><a href="editorial.html">EDITORIAL</a><a href="dark.html">DARK</a><a href="plakat.html">PLAKAT</a><a href="board.html">BOARD</a><a href="ticker.html">TICKER</a><a href="3d.html">ARENA</a><a href="3d-monolith.html">KNIGHT</a><a href="3d-play.html">PLAY</a><a href="3d-vinny.html" class="cur">VINNY</a></nav></body>
+</html>
